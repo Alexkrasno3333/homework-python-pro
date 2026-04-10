@@ -1,98 +1,172 @@
+import json
+import random
 
-def string(text):
-    return len(text)
-
-def string2(*args):
-    result = " ".join(args)
-    return result
-
-print(string("hello my name alex"))
-
-print(string2("dota 2 best game","cs-2 too"))
-
-print("-" * 150 )
-def int1(*args):
-    return [x ** 2 for x in args][0]
-
-print(int1(2))
-
-def int2(*args):
-    return sum(args)
-
-print(int2(2,2))
-
-def int3(a,b):
-    return divmod(a,b)
-
-print(int3(1, 2))
-
-print("-" * 150 )
+def load():
+    with open('database.json', 'r') as f:
+        print(json.load(f))
+        return
 
 
-def lis1(a):
-    if len(a) >= 1:
-        return sum(a) / len(a)
-    else:
-        return 0
+class Product:
+    def __init__(self,name, category, price, stock ):
+        self.name = name
+        self.category = category
+        self.price = price
+        self.stock = stock
+        self.product_id = random.randint(1,100000)
 
-print(lis1([2, 4, 6]))
+    def promotion(self):
+        self.price = self.price * 0.9
 
+    def warehouse_product (self):
+        if self.stock > 0:
+            self.stock -= 1
+        else:
+            print("Товара нет на складе")
 
-def lis2(a,b):
-    result = []
-    for x in a :
-        if x in b :
-            result.append(x)
-    return result
-
-print(lis2([1, 2, 3, 4],[3, 4, 5, 6]))
-
-print("-" * 150)
-
-def dict1 (a):
-    return a.keys()
-
-print(dict1({"age":10,"name":"alex"}))
-
-def dict2 (a,b):
-    return  a | b
-
-print(dict2({"ages":29,"name":"bob"},{"names":"alex","age":30}))
-
-print("-" * 150)
-
-def sets(a,b):
-    return a | b
-
-print(sets({1,2,3,4,5},{4,5,6,7,8}))
+    def __str__(self):
+        return f"{self.name} | {self.category} | {self.price} грн | на складе: {self.stock}"
 
 
-def sets2(a,b):
-    return  a.issubset(b)
+class Customer:
+    def __init__(self, name, email, amount):
+        self.name = name
+        self.email = email
+        self.amount = amount
+        self.order_list = []
+        self.customer_id = random.randint(1,100000)
 
-print(sets2({1, 2},{1, 2, 3, 4}))
+    def add_order(self, new_order):
+        self.order_list.append(new_order)
 
-print("-" * 150)
+    def user_amount(self, order):
+        if self.amount >= order.calculate_total():
+            return True
+        else:
+            return False
 
-def func1(*args):
-    return ["Парне" if i % 2 == 0 else "Не парне" for i in args]
+    def __str__(self):
+        return f"{self.name} | {self.email} | заказов: {len(self.order_list)} | баланс: {self.amount}"
 
-print(func1(1, 2, 3))
 
-def func2(*args):
-  result = []
-  for i in args:
-      if i % 2 == 0:
-          result.append(i)
-  return result
+class Order:
+    def __init__(self, customer_id):
+        self.product_list = []
+        self.total_price = 0
+        self.customer_id = customer_id
+        self.order_id = random.randint(1, 100000)
 
-print(func2(1, 2, 3,4,5,6,7,8))
+    def add_product(self, product):
+        self.product_list.append(product)
 
-print("-" * 150)
+    def calculate_total(self):
+        total = 0
+        for product in self.product_list:
+            total += product.price
+        self.total_price = total
+        return total
 
-a = lambda x: "парне" if x % 2 == 0 else "не парне"
-print(a(1))
-print(a(2))
-print(a(3))
-print(a(4))
-print("-" * 150)
+    def save(self):
+        new_order = {
+        "order_id": self.order_id,
+        "customer_id": self.customer_id,
+        "total_price": self.total_price,
+        "product_ids": [product.product_id for product in self.product_list]
+    }
+        try:
+            with open('database.json', 'r') as f:
+                data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            data = []
+
+        data.append(new_order)
+
+        with open('database.json', 'w') as f:
+            json.dump(data, f)
+
+def main():
+    load()
+
+    p1 = Product("Lego City", "конструктор", 1200, 15)
+    p2 = Product("Медведь", "мягкая-игрушка", 400, 10)
+    p3 = Product("Машина", "твердая-игрушка", 800, 5)
+    products = [p1, p2, p3]
+
+    bob = Customer("Bob", "wer@1235.gameil.cvom",10000)
+    print("Добро пожаловать в магазин")
+
+    user = input("\nХочешь скидку 10 процентов: yes or no: ").lower()
+    if user == 'yes':
+        for product in products:
+            product.promotion()
+
+    while True:
+        print(f"\nТвой аккаунт: {bob}")
+
+        print("\nТовары:")
+        for product in products:
+            print(product)
+
+        print("\n1 - Lego City")
+        print("2 - Медведь")
+        print("3 - Машина")
+
+        user = input("Выберите товар: ")
+
+        order1 = Order(bob.customer_id)
+
+        if user == '1':
+            selected_product = products[0]
+        elif user == '2':
+            selected_product = products[1]
+        elif user == '3':
+            selected_product = products[2]
+        else:
+            print("Неверный выбор")
+            continue
+
+        order1.add_product(selected_product)
+        total = order1.calculate_total()
+
+        print("Сумма заказа:", total)
+
+        if bob.user_amount(order1):
+            bob.amount -= total
+            selected_product.warehouse_product()
+            bob.add_order(order1)
+            order1.save()
+            print("Покупка успешна")
+
+        else:
+            print("Не хватает денег")
+
+        again = input("Купить ещё? yes/no: ").lower()
+        if again != 'yes':
+            break
+
+    print("\nОстаток товаров:")
+    for product in products:
+        print(product)
+
+    print(f"\nТвой аккаунт: {bob}")
+
+
+main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
