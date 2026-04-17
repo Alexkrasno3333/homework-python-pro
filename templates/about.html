@@ -1,0 +1,20 @@
+{% extends'base.html' %}
+
+{% block title %}
+Про меня
+{% endblock %}
+
+
+{% block body %}
+<h1>Введите информацию о себе</h1>
+<form action="/profile" method="POST">
+    <input type="text" name="name" placeholder="Ваше имя" required>
+    <br><br>
+    <input type="number" name = "age" placeholder="Ваш возраст" required>
+     <br><br>
+    <textarea name="info" placeholder="О себе" required></textarea>
+    <br><br>
+    <button type="submit" >Отправить</button>
+</form>
+{% endblock %}
+

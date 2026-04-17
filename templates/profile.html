@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Профиль
+{% endblock %}
+
+{% block body %}
+<h1>Ваш профиль</h1>
+
+<p>Имя: {{ name }}</p>
+<p>Возраст: {{ age }}</p>
+<p>О себе: {{ info }}</p>
+
+<a href="/">На главную</a>
+{% endblock %}
